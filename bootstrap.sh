@@ -30,5 +30,5 @@ for filename in ../../patches/*.patch; do
 			break
 		fi 
 	done
-	git commit -m "Apply patch $filename" -a
+	git -c user.name="John Doe" -c user.email="johndoe@gmail.com" commit -m "Apply patch $filename" -a
 done 
