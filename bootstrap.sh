@@ -1,9 +1,11 @@
 #!/bin/bash
 
 generate_proto_sources() {
-	docker build -t build-grpc -f src/grpc/Dockerfile-GRPC .
+	DOCKER_IMAGE=build-grpc
+	docker build -t $DOCKER_IMAGE -f src/grpc/Dockerfile-GRPC .
 	echo $(pwd)
-	docker run -v $(pwd)/src/grpc:/usr/src/app build-grpc
+	docker run --rm -v $(pwd)/src/grpc:/usr/src/app $DOCKER_IMAGE
+	docker rmi $DOCKER_IMAGE 	
 }
 
 TAG=v2.2.0
