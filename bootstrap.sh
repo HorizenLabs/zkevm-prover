@@ -21,8 +21,18 @@ else
 	git reset --hard tags/$TAG
 fi
 git checkout tags/$TAG
-for filename in ../../patches/*.patch; do
+PATCHES_TO_APPLY=1000
+if [ ! -z $1 ]; then
+	let PATCHES_TO_APPLY=$(($1))
+fi
+COUNT_PATCHES=0
+for filename in ../../patches/[0-9][0-9][0-9]_*.patch; do
+	if [ "$COUNT_PATCHES" -ge "$PATCHES_TO_APPLY" ]; then
+		echo "skipping after applying $COUNT_PATCHES patches"
+		break 
+	fi
 	git apply $filename
+	let COUNT_PATCHES=COUNT_PATCHES+1
 	git add .
 	for file in $(git diff --name-only HEAD); do
 		if [[ "$file" =~ \.proto$ ]]; then
@@ -30,5 +40,5 @@ for filename in ../../patches/*.patch; do
 			break
 		fi 
 	done
-	git -c user.name="John Doe" -c user.email="johndoe@gmail.com" commit -m "Apply patch $filename" -a
-done 
+	git -c user.name="John Doe" -c user.email="johndoe@gmail.com" commit -m "Apply patch $(basename -s .patch $filename)" -a
+done
