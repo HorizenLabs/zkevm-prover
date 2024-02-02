@@ -1,0 +1,103 @@
+diff --git a/Dockerfile b/Dockerfile
+index 6d908b3f..7c7f3b7e 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -8,7 +8,7 @@ COPY ./src ./src
+ COPY ./test ./test
+ COPY ./tools ./tools
+ COPY Makefile .
+-RUN make -j
++RUN make -j `nproc`
+ 
+ FROM ubuntu:22.04
+ 
+@@ -18,5 +18,12 @@ RUN apt update && apt install -y build-essential libgmp-dev nlohmann-json3-dev l
+ 
+ COPY --from=build /usr/src/app/build/zkProver /usr/local/bin
+ 
+-ENTRYPOINT [ "zkProver" ]
++COPY ./testvectors ./testvectors
++COPY ./config ./config
++COPY ./src/main_sm/fork_1/scripts/rom.json ./src/main_sm/fork_1/scripts/rom.json
++COPY ./src/main_sm/fork_2/scripts/rom.json ./src/main_sm/fork_2/scripts/rom.json
++COPY ./src/main_sm/fork_3/scripts/rom.json ./src/main_sm/fork_3/scripts/rom.json
++COPY ./src/main_sm/fork_4/scripts/rom.json ./src/main_sm/fork_4/scripts/rom.json
++COPY ./src/main_sm/fork_5/scripts/rom.json ./src/main_sm/fork_5/scripts/rom.json
+ 
++ENTRYPOINT []
+diff --git a/src/grpc/Dockerfile-GRPC b/src/grpc/Dockerfile-GRPC
+new file mode 100644
+index 00000000..4ff48375
+--- /dev/null
++++ b/src/grpc/Dockerfile-GRPC
+@@ -0,0 +1,7 @@
++FROM ubuntu:22.04 as build
++
++WORKDIR /usr/src/app
++
++RUN apt update && apt install -y build-essential libgmp-dev libbenchmark-dev nasm nlohmann-json3-dev libsecp256k1-dev libomp-dev libpqxx-dev git libssl-dev cmake libgrpc++-dev libprotobuf-dev grpc-proto libsodium-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
++
++ENTRYPOINT ["./build_docker.sh"]
+diff --git a/src/grpc/build_docker.sh b/src/grpc/build_docker.sh
+new file mode 100755
+index 00000000..266b9b33
+--- /dev/null
++++ b/src/grpc/build_docker.sh
+@@ -0,0 +1,4 @@
++#!/bin/bash
++
++make clean
++make -j `nproc`
+diff --git a/src/grpc/proto/aggregator.proto b/src/grpc/proto/aggregator.proto
+index ca2cb9c7..d3d4d879 100644
+--- a/src/grpc/proto/aggregator.proto
++++ b/src/grpc/proto/aggregator.proto
+@@ -236,11 +236,13 @@ message GetProofResponse {
+ /*
+  * @dev FinalProof
+  * @param {proof} - groth16 proof
++ * @param {compact_public_input} - compact version of the public inputs to be verified by proof
+  * @param {public} - public circuit inputs
+ */
+ message FinalProof {
+     string proof = 1;
+     PublicInputsExtended public = 2;
++    string compact_public_input = 3;
+ }
+ 
+ /*
+diff --git a/src/service/aggregator/aggregator_client.cpp b/src/service/aggregator/aggregator_client.cpp
+index 0220107e..c0eb379e 100644
+--- a/src/service/aggregator/aggregator_client.cpp
++++ b/src/service/aggregator/aggregator_client.cpp
+@@ -508,6 +508,11 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
+                     pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
+                     pFinalProof->set_allocated_public_(pPublicInputsExtended);
+ 
++                    auto public_input = pProverRequest->proof.publics.front();
++                    auto public_hex = NormalizeTo0xNFormat(mpz_class(public_input, 10).get_str(16), 64);
++                    zklog.info("AggregatorClient::GetProof() setting public input: Dec = " + public_input + " Hex = " + public_hex);
++                    pFinalProof->set_compact_public_input(public_hex);
++
+                     getProofResponse.set_allocated_final_proof(pFinalProof);
+ 
+                     break;
+diff --git a/test/service/aggregator/aggregator_client_mock.cpp b/test/service/aggregator/aggregator_client_mock.cpp
+index 7b4bb1c1..4ad94e0b 100644
+--- a/test/service/aggregator/aggregator_client_mock.cpp
++++ b/test/service/aggregator/aggregator_client_mock.cpp
+@@ -196,6 +196,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
+                 pPublicInputsExtended->set_new_local_exit_root("0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e");
+                 pPublicInputsExtended->set_new_batch_num(2);
+                 pFinalProof->set_allocated_public_(pPublicInputsExtended);
++                pFinalProof->set_compact_public_input("0x0c79b6e9556f45cc75c0ac6570cb17913360a6d3026401a766dc91bbe56254c1");
+                 getProofResponse.set_allocated_final_proof(pFinalProof);
+                 break; 
+             }
+@@ -384,4 +385,4 @@ void* aggregatorClientMockThread(void* arg)
+         sleep(5);
+     }
+     return NULL;
+-}
+\ No newline at end of file
++}
