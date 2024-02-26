@@ -8,7 +8,7 @@ generate_proto_sources() {
 	docker rmi $DOCKER_IMAGE 	
 }
 
-TAG=v2.2.0
+TAG=v3.0.2
 mkdir -p prover_src
 cd prover_src
 if [ ! -d "zkevm-prover" ]; then

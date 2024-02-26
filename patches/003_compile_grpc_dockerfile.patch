@@ -1,0 +1,23 @@
+diff --git a/src/grpc/Dockerfile-GRPC b/src/grpc/Dockerfile-GRPC
+new file mode 100644
+index 00000000..4ff48375
+--- /dev/null
++++ b/src/grpc/Dockerfile-GRPC
+@@ -0,0 +1,7 @@
++FROM ubuntu:22.04 as build
++
++WORKDIR /usr/src/app
++
++RUN apt update && apt install -y build-essential libgmp-dev libbenchmark-dev nasm nlohmann-json3-dev libsecp256k1-dev libomp-dev libpqxx-dev git libssl-dev cmake libgrpc++-dev libprotobuf-dev grpc-proto libsodium-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
++
++ENTRYPOINT ["./build_docker.sh"]
+diff --git a/src/grpc/build_docker.sh b/src/grpc/build_docker.sh
+new file mode 100755
+index 00000000..266b9b33
+--- /dev/null
++++ b/src/grpc/build_docker.sh
+@@ -0,0 +1,4 @@
++#!/bin/bash
++
++make clean
++make -j `nproc`
