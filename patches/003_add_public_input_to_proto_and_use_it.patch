@@ -1,3 +1,21 @@
+diff --git a/src/grpc/proto/aggregator.proto b/src/grpc/proto/aggregator.proto
+index ca2cb9c7..d3d4d879 100644
+--- a/src/grpc/proto/aggregator.proto
++++ b/src/grpc/proto/aggregator.proto
+@@ -236,11 +236,13 @@ message GetProofResponse {
+ /*
+  * @dev FinalProof
+  * @param {proof} - groth16 proof
++ * @param {compact_public_input} - compact version of the public inputs to be verified by proof
+  * @param {public} - public circuit inputs
+ */
+ message FinalProof {
+     string proof = 1;
+     PublicInputsExtended public = 2;
++    string compact_public_input = 3;
+ }
+ 
+ /*
 diff --git a/src/service/aggregator/aggregator_client.cpp b/src/service/aggregator/aggregator_client.cpp
 index 0220107e..c0eb379e 100644
 --- a/src/service/aggregator/aggregator_client.cpp
@@ -33,3 +51,4 @@ index 7b4bb1c1..4ad94e0b 100644
 -}
 \ No newline at end of file
 +}
+
