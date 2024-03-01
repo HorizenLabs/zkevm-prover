@@ -35,3 +35,5 @@ cd deploy
 ./prepare.sh
 docker compose up -d
 ```
+
+An outdated but useful description of what these steps doing can be found in the https://docs.google.com/document/d/1Xwjuj3uOc1DcXk-g6e6N9wLRbDFFzv9eXQCzXYDO6Zw/edit#heading=h.s0vy9xy5gy0 document.
