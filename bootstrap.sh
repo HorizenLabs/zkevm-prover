@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Load envirorments
+. .env
+
+TAG=${TAG:-v3.0.2}
+
 generate_proto_sources() {
 	DOCKER_IMAGE=build-grpc
 	docker build -t $DOCKER_IMAGE -f src/grpc/Dockerfile-GRPC .
@@ -8,7 +13,6 @@ generate_proto_sources() {
 	docker rmi $DOCKER_IMAGE 	
 }
 
-TAG=v3.0.2
 mkdir -p prover_src
 cd prover_src
 if [ ! -d "zkevm-prover" ]; then
