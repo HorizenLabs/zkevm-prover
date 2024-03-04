@@ -30,7 +30,7 @@ To deploy a new prover you can just go in the `deploy` folder, run the `./prepar
 ```bash
 cd deploy
 # Compile the prover and build the image
-# Download the fork id dependencies (if they doesn't exist)
+# Download the fork id dependencies (if they don't exist)
 # Can need several minutes to complete these steps
 ./prepare.sh
 docker compose up -d
