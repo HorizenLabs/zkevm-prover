@@ -1,1 +1,3 @@
 prover_src/
+/deploy/config
+/deploy/v*-fork.*

@@ -1,0 +1,14 @@
+diff --git a/Dockerfile b/Dockerfile
+index 6d908b3f..7c7f3b7e 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -9,7 +9,7 @@ COPY ./src ./src
+ COPY ./test ./test
+ COPY ./tools ./tools
+ COPY ./config ./config
+ COPY Makefile .
+-RUN make -j
++RUN make -j `nproc`
+ 
+ FROM ubuntu:22.04
+ 
