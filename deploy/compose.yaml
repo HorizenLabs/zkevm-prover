@@ -3,7 +3,6 @@ services:
   cdk-validium-prover:
     image: hl/zkevm-prover:v3.0.2
     container_name: cdk-validium-prover
-    network_mode: "host"
     ports:
       - 50051:50051 # Prover
       - 50052:50052 # Mock prover
@@ -13,6 +12,5 @@ services:
       - ./config.json:/usr/src/app/config.json
       - ../prover_src/zkevm-prover/src:/usr/src/app/src
       - ./config:/usr/src/app/config
-    command: > 
+    command: >
       -c /usr/src/app/config.json
-
